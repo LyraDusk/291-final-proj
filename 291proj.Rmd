@@ -1,0 +1,12 @@
+---
+title: "proj"
+author: "Lauren Meyer"
+date: "3/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Hello all!
