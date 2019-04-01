@@ -1,0 +1,138 @@
+---
+title: "Data_appendix"
+author: "Lauren Meyer"
+date: "3/28/2019"
+output: pdf_document
+---
+Loading Data
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mosaic)
+library(readr)
+library(ipumsr)
+#ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
+ddi <- read_ipums_ddi("usa_00004.xml")
+ipumsdata <- read_ipums_micro(ddi)
+#head(ipumsdata)
+#save(ipumsdata, file = "ipumsdata.rda")
+small_data <- ipumsdata %>%
+  select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
+```
+
+Structure and Names
+```{r}
+str(small_data)
+```
+There are 18 variables in the data, and 3,190,040 observations.
+Variables: 
+* YEAR: The year of the observation.
+```{r}
+favstats(~YEAR, data = small_data)
+```
+This dataset contains only the 2017 survey data. 
+
+* SERIAL: Unique serial number assigned to each household.
+```{r}
+favstats(~SERIAL, data = small_data)
+```
+Expected distribution of a unique sequential code.
+
+* STATEFIP: Numerical code signifying state. 
+```{r}
+favstats(~STATEFIP, data = small_data)
+```
+Max of 56 seems odd for a country with 50 states, but I'm guessing those are territory markers such as DC and Guam. 
+
+* METRO: Is the household in a metropolitan area or not?
+```{r}
+favstats(~METRO, data = small_data)
+```
+This one seems to be a set of numerical codes, not an actual integer value. I'll have to convert this one to a factor variable before doing anything else with it.
+
+* OWNERSHP: Code for whether and how the household owns their dwelling.
+```{r}
+favstats(~OWNERSHP, data = small_data)
+```
+This one is also an integer code, with levels 0, 1, and 2. Will need to convert to factor.
+
+* HHINCOME: Total household income.
+```{r}
+favstats(~HHINCOME, data = small_data)
+```
+I'm curious how a household manages to get a negative household income. Maybe it factors in debts and other things?
+
+* PHONE: Availability of a telephone.
+```{r}
+favstats(~PHONE, data = small_data)
+```
+Another factor variable. 
+
+* CINETHH: Whether any member of the household has internet access.
+```{r}
+favstats(~CINETHH, data = small_data)
+```
+A lot of these seem to be factor variables.
+
+* SEX: Binary int, male vs female.
+```{r}
+favstats(~SEX, data = small_data)
+```
+As expected, factors numbered 1 and 2. 
+
+* AGE: Age of the respondent.
+```{r}
+favstats(~AGE, data = small_data)
+```
+Youngest is 0, oldest is 96. Seems accurate.
+
+* RACE: Numerical code for race of respondent.
+```{r}
+favstats(~RACE, data = small_data)
+```
+Seems to be another factor variable. 
+
+* EDUC: Highest year of schooling/educational attainment.
+```{r}
+favstats(~EDUC, data = small_data)
+```
+This survey really likes integer codes.
+
+* EMPSTAT: Employment status. 
+```{r}
+favstats(~EMPSTAT, data = small_data)
+```
+This survey *really* likes integer codes.
+
+* OCC: Occupation of worker.
+```{r}
+favstats(~OCC, data = small_data)
+```
+This one also seems coded, but there are a lot more codes than the rest of them.
+
+* INCTOT: Personal income. 
+```{r}
+favstats(~INCTOT, data = small_data)
+```
+Again, negative income? Unsure how that factors in. 
+
+* FTOTINC: Total family income.
+```{r}
+favstats(~FTOTINC, data = small_data)
+```
+I'm not sure where this negative income is coming from. At least the numbers otherwise make sense!
+
+* DIFFEYE: Any vision disability, blindness, etc.
+```{r}
+favstats(~DIFFEYE, data = small_data)
+```
+This one seems simple, a basic binary code. 
+
+* TRANTIME: Length of commute. 
+```{r}
+favstats(~TRANTIME, data = small_data)
+```
+I pity the person who has an 160-minute commute to work, but the rest of it looks good. 
+
+Most Pressing, to do:
+Convert the integer codes to factor levels, possibly rename the factor levels. 
+Decide which variables we want to work with so we don't waste time fixing data we don't end up using.
