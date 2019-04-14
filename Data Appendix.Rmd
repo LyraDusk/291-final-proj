@@ -15,6 +15,7 @@ ddi <- read_ipums_ddi("usa_00004.xml")
 ipumsdata <- read_ipums_micro(ddi)
 #head(ipumsdata)
 #save(ipumsdata, file = "ipumsdata.rda")
+#ipumsdata <- read_csv("usa_00004.dat")
 small_data <- ipumsdata %>%
   select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
 ```
@@ -136,3 +137,87 @@ I pity the person who has an 160-minute commute to work, but the rest of it look
 Most Pressing, to do:
 Convert the integer codes to factor levels, possibly rename the factor levels. 
 Decide which variables we want to work with so we don't waste time fixing data we don't end up using.
+
+```{r}
+newdata<-small_data %>%
+mutate(internet=if_else(CINETHH==3,0,
+                if_else(CINETHH %in% 1:2,1,NA_real_)))
+m1<-glm(internet ~ AGE, data = newdata)
+m1
+ggplot(data = newdata, aes(x = AGE, y = internet)) +
+geom_point() 
+qplot(x=as.factor(internet),y=AGE,data=newdata,geom="boxplot")+coord_flip()
+ggplot(data = newdata, aes(x = as.factor(AGE), y = internet)) +
+geom_bar(stat="identity")
+```
+```{r}
+qplot(x=as.factor(internet),y=HHINCOME,data=newdata,geom="boxplot")+coord_flip()
+
+```
+
+```{r}
+newdata %>%
+group_by(as.factor(RACE)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(RACE)`)) + geom_bar(stat="identity")
+
+qplot(x=as.factor(internet),y=AGE,data=newdata,geom="boxplot")+coord_flip()
+ggplot(data = newdata, aes(x = as.factor(AGE), y = internet)) +
+geom_bar(stat="identity")
+
+```
+```{r}
+newdata %>%
+group_by(as.factor(PHONE)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(PHONE)`)) + geom_bar(stat="identity")
+```
+```{r}
+qplot(x=as.factor(internet),y=INCTOT,data=newdata,geom="boxplot")+coord_flip()
+```
+
+```{r}
+newdata %>%
+group_by(as.factor(PHONE)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(PHONE)`)) + geom_bar(stat="identity")
+```
+
+
+```{r}
+newdata %>%
+group_by(as.factor(SEX)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(SEX)`)) + geom_bar(stat="identity")
+
+```
+```{r}
+newdata %>%
+group_by(as.factor(EMPSTAT)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(EMPSTAT)`)) + geom_bar(stat="identity")
+
+```
+
+Surprising how no education is so high.
+```{r}
+newdata %>%
+group_by(as.factor(METRO)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(METRO)`)) + geom_bar(stat="identity")
+```
+
+```{r}
+newdata %>%
+group_by(as.factor(OWNERSHP)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(OWNERSHP)`)) + geom_bar(stat="identity")
+
+```
+```{r}
+newdata %>%
+group_by(as.factor(STATEFIP)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(STATEFIP)`)) + geom_bar(stat="identity")
+
+```
