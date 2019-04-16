@@ -175,6 +175,9 @@ ggplot(aes(y=mean,x=`as.factor(PHONE)`)) + geom_bar(stat="identity")
 ```{r}
 qplot(x=as.factor(internet),y=INCTOT,data=newdata,geom="boxplot")+coord_flip()
 ```
+```{r}
+qplot(x=as.factor(internet),y=TRANTIME,data=newdata,geom="boxplot")+coord_flip()
+```
 
 ```{r}
 newdata %>%
@@ -196,6 +199,13 @@ newdata %>%
 group_by(as.factor(EMPSTAT)) %>%
  summarize(mean=mean(internet, na.rm=TRUE)) %>%
 ggplot(aes(y=mean,x=`as.factor(EMPSTAT)`)) + geom_bar(stat="identity")
+
+```
+```{r}
+newdata %>%
+group_by(as.factor(DIFFEYE)) %>%
+ summarize(mean=mean(internet, na.rm=TRUE)) %>%
+ggplot(aes(y=mean,x=`as.factor(DIFFEYE)`)) + geom_bar(stat="identity")
 
 ```
 
