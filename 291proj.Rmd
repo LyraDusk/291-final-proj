@@ -55,5 +55,30 @@ summary(m1)
 anova(m,m1,test="Chisq")
 ```
 
+```{r}
+m2<-glm(internet~as.factor(STATEFIP)+AGE, data=samp, family=binomial)
+summary(m2)
+```
+```{r}
+m3<-glm(internet~as.factor(PHONE)+AGE, data=samp, family=binomial)
+summary(m3)
+m4<-glm(internet~as.factor(PHONE)*AGE, data=samp, family=binomial)
+summary(m4)
+```
+
+```{r}
+m5<-glm(internet~TRANTIME, data=samp, family=binomial)
+summary(m5)
+m6<-glm(internet~TRANTIME+AGE, data=samp, family=binomial)
+summary(m6)
+m7<-glm(internet~TRANTIME*AGE, data=samp, family=binomial)
+summary(m7)
+```
+
+```{r}
+m8<-glm(internet~TRANTIME + as.factor(PHONE)+AGE, data=samp, family=binomial)
+summary(m8)
+```
+Note: It seems as though when you try to combine AGE with other variables (by *), AGE becomes less significant.
 
 
