@@ -78,7 +78,31 @@ summary(m7)
 ```{r}
 m8<-glm(internet~TRANTIME + as.factor(PHONE)+AGE, data=samp, family=binomial)
 summary(m8)
+m9<-glm(internet~TRANTIME + as.factor(PHONE)+AGE+as.factor(race_int), data=samp, family=binomial)
+summary(m9)
+m10<-glm(internet~TRANTIME+INCTOT*AGE + as.factor(PHONE)+as.factor(race_int), data=samp, family=binomial)
+summary(m10)
 ```
 Note: It seems as though when you try to combine AGE with other variables (by *), AGE becomes less significant.
+
+```{r}
+m10<-glm(internet~INCTOT*AGE, data=samp, family=binomial)
+summary(m10)
+m11<-glm(internet~INCTOT, data=samp, family=binomial)
+summary(m11)
+```
+INCTOT*AGE makes INCTOT's coefficient negative, which doesn't really make sense.
+
+```{r}
+m12<-glm(internet~as.factor(DIFFEYE), data=samp, family=binomial)
+summary(m12)
+m13<-glm(internet~as.factor(METRO), data=samp, family=binomial)
+summary(m13)
+mfinal<-glm(internet~TRANTIME+INCTOT+AGE + as.factor(PHONE)+as.factor(race_int)+as.factor(DIFFEYE), data=samp, family=binomial)
+summary(mfinal)
+```
+DIFFEYE: 2=blindness 1=sightedness
+I want to try to combine categories 2-4 in METRO
+
 
 
