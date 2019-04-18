@@ -1,0 +1,88 @@
+---
+title: "proj"
+author: "Lauren Meyer"
+date: "3/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mosaic)
+library(readr)
+library(tidyverse)
+library(ipumsr)
+ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
+ddi <- read_ipums_ddi("usa_00004.xml")
+ipumsdata <- read_ipums_micro(ddi)
+head(ipumsdata)
+save(ipumsdata, file = "ipumsdata.rda")
+ipumsdata <- read_csv("usa_00004.csv")
+small_data <- ipumsdata %>%
+  select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
+newdata<-small_data %>%
+mutate(internet=if_else(CINETHH==3,0,
+                if_else(CINETHH %in% 1:2,1,NA_real_)))
+samp<-sample_n(newdata,100000)
+```
+
+```{r}
+m<-glm(internet~as.factor(RACE)+AGE, data=samp, family=binomial)
+summary(m)
+```
+RACE and AGE are significant.
+RACE:
+1-white
+2-black
+3-American Indian/Alaskan Native
+4-chinese
+5-japanese
+6-Asian/pacific islander
+7-other race
+8-2 major races
+9-3 or more major races (insignificant)
+
+```{r}
+#Adding indicators for just 1,2,3, and 7, the significant interactions
+samp <- samp %>%
+  mutate(race_int = ifelse(RACE == 1,1, 
+                           ifelse(RACE == 2,2,
+                                  ifelse(RACE == 3,3,
+                                         ifelse(RACE == 7,4,0)))))
+m1<-glm(internet~AGE*as.factor(race_int), data=samp, family=binomial)
+summary(m1)
+anova(m,m1,test="Chisq")
+```
+
+
+I'm starting to be more interested in the people that DO NOT have access to internet. So I could relevel the variable internet, but I will instead create a new variable internet_not where the reference is people who do not have internet
+```{r}
+samp<- samp%>%
+  mutate(internet_not = relevel(as.factor(samp$internet), ref = 1))
+```
+
+Make a regression model between  race and metro status. the codes for metro are as follows
+0- indeterminable metro status
+1- not in metropolitan area
+2- in central principal city
+3- not in central principa city
+4- central/principal city status indeterminable
+
+
+Interactive model
+```{r}
+m2<-glm(internet_not~as.factor(race_int)*as.factor(METRO), data=samp, family=binomial)
+summary(m2)
+```
+
+Additive model
+```{r}
+m3<-glm(internet_not~as.factor(race_int)+as.factor(METRO), data=samp, family=binomial)
+summary(m3)
+```
+
+```{r}
+anova(m2,m3)
+```
+The null hypothesis is that there is no relationship between metro status and race as explanatory variables for internet, and the alternative hypothesis is that there is some interaction. 
+
+The test statistic obtained from the anova is significant, so we have enough evidence to reject the null hypothesis and say that there is an interaction between race and metro status in explanation of having internet. 
