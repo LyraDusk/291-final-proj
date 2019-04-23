@@ -11,10 +11,10 @@ library(mosaic)
 library(readr)
 library(tidyverse)
 library(ipumsr)
-ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
-ddi <- read_ipums_ddi("usa_00004.xml")
-ipumsdata <- read_ipums_micro(ddi)
-head(ipumsdata)
+#ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
+#ddi <- read_ipums_ddi("usa_00004.xml")
+#ipumsdata <- read_ipums_micro(ddi)
+#head(ipumsdata)
 #save(ipumsdata, file = "ipumsdata.rda")
 ipumsdata <- read_csv("usa_00004.csv")
 small_data <- ipumsdata %>%
@@ -107,7 +107,11 @@ I want to try to combine categories 2-4 in METRO
 ```{r}
 # Lauren messing around
 
-m14 <- glm(internet~as.factor(HHINCOME), data = samp, family = binomial)
+m14 <- glm(internet~HHINCOME + AGE + HHINCOME*AGE, data=samp, family=binomial)
 summary(m14)
+m15 <- glm(internet~TRANTIME+HHINCOME+AGE + as.factor(PHONE)+as.factor(race_int)+as.factor(DIFFEYE), data=samp, family=binomial)
+summary(m15)
+anova(mfinal,m15,test="Chisq")
+
 ```
 
