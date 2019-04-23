@@ -15,7 +15,7 @@ ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
 ddi <- read_ipums_ddi("usa_00004.xml")
 ipumsdata <- read_ipums_micro(ddi)
 head(ipumsdata)
-save(ipumsdata, file = "ipumsdata.rda")
+#save(ipumsdata, file = "ipumsdata.rda")
 ipumsdata <- read_csv("usa_00004.csv")
 small_data <- ipumsdata %>%
   select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
@@ -104,5 +104,10 @@ summary(mfinal)
 DIFFEYE: 2=blindness 1=sightedness
 I want to try to combine categories 2-4 in METRO
 
+```{r}
+# Lauren messing around
 
+m14 <- glm(internet~as.factor(HHINCOME), data = samp, family = binomial)
+summary(m14)
+```
 
