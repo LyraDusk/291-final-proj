@@ -128,7 +128,7 @@ I want to try to combine categories 2-4 in METRO
 
 m14 <- glm(internet~HHINCOME + AGE + HHINCOME*AGE, data=samp, family=binomial)
 summary(m14)
-m15 <- glm(internet~TRANTIME+HHINCOME+AGE + as.factor(PHONE)+as.factor(race_int)+as.factor(DIFFEYE), data=samp, family=binomial)
+m15 <- glm(internet~TRANTIME+HHINCOME+AGE + as.factor(PHONE)+race_int+as.factor(DIFFEYE), data=samp, family=binomial)
 summary(m15)
 anova(mfinal,m15,test="Chisq")
 mrace <- glm(internet~as.factor(race_int), data = samp, family = binomial)
