@@ -26,7 +26,30 @@ samp<-sample_n(newdata,100000)
 ```
 
 ```{r}
-m<-glm(internet~as.factor(RACE)+AGE, data=samp, family=binomial)
+#naming races
+samp <- samp %>%
+  mutate(race_int = ifelse(RACE == 1,"white", 
+                           ifelse(RACE == 2,"black",
+                                  ifelse(RACE == 3, "american indian/alaskan native",
+                                         ifelse(RACE == 7,"other race",
+                                                ifelse(RACE == 4, "chinese", 
+                                                       ifelse(RACE == 5, "japanese",
+                                                              ifelse(RACE == 6, "asian/pac islander",
+                                                                     ifelse(RACE == 8, "2 or more",
+                                                                            ifelse(RACE == 9, "3 or more",0))))))))))
+#Making variables factors in order to relevel
+samp <- samp %>%
+  mutate(race_int = as.factor(race_int))
+
+samp <- samp %>%
+  mutate(internet = as.factor(internet))
+
+#Relevel factors to white and people with internet
+samp$race_int <- relevel(samp$race_int, ref = "white")
+samp$internet <- relevel(samp$internet, ref = 1)
+
+
+m<-glm(internet~race_int+AGE, data=samp, family=binomial)
 summary(m)
 ```
 RACE and AGE are significant.
@@ -43,17 +66,16 @@ RACE:
 
 ```{r}
 
-#Adding indicators for just 1,2,3, and 7, the significant interactions
-samp <- samp %>%
-  mutate(race_int = ifelse(RACE == 1,1, 
-                           ifelse(RACE == 2,2,
-                                  ifelse(RACE == 3,3,
-                                         ifelse(RACE == 7,4,0)))))
-m1<-glm(internet~AGE*as.factor(race_int), data=samp, family=binomial)
+
+
+m1<-glm(internet~AGE*race_int, data=samp, family=binomial)
 summary(m1)
+
 
 anova(m,m1,test="Chisq")
 ```
+
+
 
 ```{r}
 m2<-glm(internet~as.factor(STATEFIP)+AGE, data=samp, family=binomial)
