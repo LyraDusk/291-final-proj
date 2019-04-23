@@ -33,10 +33,7 @@ samp <- samp %>%
                                   ifelse(RACE == 3, "american indian/alaskan native",
                                          ifelse(RACE == 7,"other race",
                                                 ifelse(RACE == 4, "chinese", 
-                                                       ifelse(RACE == 5, "japanese",
-                                                              ifelse(RACE == 6, "asian/pac islander",
-                                                                     ifelse(RACE == 8, "2 or more",
-                                                                            ifelse(RACE == 9, "3 or more",0))))))))))
+                                                              ifelse(RACE == 6, "asian/pac islander","other/multiple")))))))
 #Making variables factors in order to relevel
 samp <- samp %>%
   mutate(race_int = as.factor(race_int))
@@ -134,6 +131,7 @@ summary(m14)
 m15 <- glm(internet~TRANTIME+HHINCOME+AGE + as.factor(PHONE)+as.factor(race_int)+as.factor(DIFFEYE), data=samp, family=binomial)
 summary(m15)
 anova(mfinal,m15,test="Chisq")
-
+mrace <- glm(internet~as.factor(race_int), data = samp, family = binomial)
+summary(mrace)
 ```
 
