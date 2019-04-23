@@ -11,24 +11,38 @@ library(mosaic)
 library(readr)
 library(tidyverse)
 library(ipumsr)
+
+#Grab data
 ipumsdata <- read_csv("usa_00004.csv", locale = locale(encoding = "latin1"))
 ddi <- read_ipums_ddi("usa_00004.xml")
 ipumsdata <- read_ipums_micro(ddi)
 head(ipumsdata)
 save(ipumsdata, file = "ipumsdata.rda")
 ipumsdata <- read_csv("usa_00004.csv")
+```
+
+We will select the variables aout of the ipums data that is imporant to us. The variables we selected are those that we believe may be confounding variables. I will use different regressions to test the confounding variables if I see that method fit. Next, a new variable is created: internet, which is an indicator variable where 0 denotes no access to internet in the home, and 1 denotes access to internet in home. 
+```{r}
 small_data <- ipumsdata %>%
   select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
+
+
+#Indicator variable 0 - no internet, 1 - internet
 newdata<-small_data %>%
 mutate(internet=if_else(CINETHH==3,0,
                 if_else(CINETHH %in% 1:2,1,NA_real_)))
+```
+
+
+
+Ipums data is extremely large, 3,190,040 observations in fact. So we will use a sample of 100000 to test the regressions for efficiency. 
+```{r}
 samp<-sample_n(newdata,100000)
 ```
 
-```{r}
-m<-glm(internet~as.factor(RACE)+AGE, data=samp, family=binomial)
-summary(m)
-```
+
+First, let's consider race as an explanatory variable. Ipums uses the following codes to denote each category of race:
+
 RACE and AGE are significant.
 RACE:
 1-white
@@ -42,23 +56,69 @@ RACE:
 9-3 or more major races (insignificant)
 
 ```{r}
+#Clean up RACE variable 
+#samp<- samp%>%
+ # mutate(RACE = if_else(RACE == "1", "white",
+  #                      if_else(RACE == "2", "black", 
+   #                     if_else(RACE == "3", "aIndian/AlaskanNative",
+    #                    if_else(RACE == "4", "chinese",
+     #                   if_else(RACE == "5", "japanese",
+#                        if_else(RACE == "6", "asian/pacific",
+ #                       if_else(RACE == "7", "other",
+  #                      if_else(RACE == "8", "2 major races",
+   #                     if_else(RACE == "9", "3 or more major races", "na"))))))))))
+
+samp$RACE <- relevel(as.factor(samp$RACE), ref = 1)
+samp$internet<- relevel(as.factor(samp$internet), ref = "1")
+
+m1<-glm(internet~as.factor(RACE), data=samp, family=binomial)
+summary(m1)
+```
+So the log odds of someone that identifies as white does not have internet is -2.371. That is to say that the odds of someone that is white is .0934 (lower) than a white person with internet. 
+
+The log odds of someone that identifies as black does not have internet is 0.72699. That is to say that the odds of someone who identifies as black does not have internet is 2.068844 (higher) than a white person. 
+
+The log odds of someone that identifies as American Indian or Alaskan Native does not have internet is 1.41944. That is to say that the odds of someone who identifies as American Indian or Alaskan Native does not have internet is 4.134804 (higher) than a white person. 
+
+The log odds of someone that identifies as Chinese does not have internet is -0.59685 That is to say that the odds of someone who identifies as Chinese does not have internet is 
+0.5505431 (lower) than a white person. 
+
+
+The log odds of someone that identifies as Japanese does not have internet is -0.12332. That is to say that the odds of someone who identifies as Japanese does not have internet is 0.8839807 (lower) than a white person. 
+
+The log odds of someone that identifies as Asian or Pacific Islander does not have internet is -0.83567. That is to say that the odds of someone who identifies as Asian or Pacific Islander does not have internet is 0.4335839 (lower) than a white person. 
+
+The log odds of someone that identifies as 2 or more races does not have internet is  0.32667 . That is to say that the odds of someone who identifies as 2 or more races does not have internet is 1.386344 (higher) than a white person. 
+
+The log odds of someone that identifies as 3 or more races does not have internet is  -0.55296  . That is to say that the odds of someone who identifies as 3 or more races does not have internet is 0.5752446 (lower) than a white person. 
+
+
+
+
+We would like to consider the categories of race that were found to be significant. 
+
+```{r}
 #Adding indicators for just 1,2,3, and 7, the significant interactions
 samp <- samp %>%
-  mutate(race_int = ifelse(RACE == 1,1, 
-                           ifelse(RACE == 2,2,
-                                  ifelse(RACE == 3,3,
-                                         ifelse(RACE == 7,4,0)))))
+  mutate(race_int = ifelse(RACE == 1,"white", 
+                           ifelse(RACE == 2,"black",
+                                  ifelse(RACE == 3,"american indian/ alaskan native",
+                                         ifelse(RACE == 7,"other race",0)))))
 m1<-glm(internet~AGE*as.factor(race_int), data=samp, family=binomial)
 summary(m1)
-anova(m,m1,test="Chisq")
 ```
 
 
 I'm starting to be more interested in the people that DO NOT have access to internet. So I could relevel the variable internet, but I will instead create a new variable internet_not where the reference is people who do not have internet
 ```{r}
-samp<- samp%>%
-  mutate(internet_not = relevel(as.factor(samp$internet), ref = 1))
+
+samp$METRO<- relevel()
 ```
+**Set reference for metro and race
+it's useful to use reference for most represented group 
+Need to filter out N/A
+
+
 
 Make a regression model between  race and metro status. the codes for metro are as follows
 0- indeterminable metro status
@@ -70,16 +130,22 @@ Make a regression model between  race and metro status. the codes for metro are 
 
 Interactive model
 ```{r}
-m2<-glm(internet_not~as.factor(race_int)*as.factor(METRO), data=samp, family=binomial)
+m2<-glm(internet~as.factor(race_int)*as.factor(METRO), data=samp, family=binomial)
 summary(m2)
 ```
+In this model, the odds of someone  having internet is e^(2.245)
+
+
+
+
+
 
 Additive model
 ```{r}
-m3<-glm(internet_not~as.factor(race_int)+as.factor(METRO), data=samp, family=binomial)
+m3<-glm(internet~as.factor(race_int)+as.factor(METRO), data=samp, family=binomial)
 summary(m3)
 ```
-
+In this regression 
 ```{r}
 anova(m2,m3)
 ```
