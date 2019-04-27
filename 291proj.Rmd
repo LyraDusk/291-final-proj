@@ -133,5 +133,11 @@ summary(m15)
 anova(mfinal,m15,test="Chisq")
 mrace <- glm(internet~as.factor(race_int), data = samp, family = binomial)
 summary(mrace)
-```
 
+```
+.07319+7.211e-03(TRANTIME)+(1.863e-05)HHINCOME-.02437(AGE) + 2.572(PHONE)-.2832(race_int)-.4315(DIFFEYE)
+```{r}
+x1<-TRANTIME+HHINCOME+AGE + as.factor(PHONE)+race_int+as.factor(DIFFEYE)
+plot(x1,internet)
+curve(predict(m15,data.frame(x1=x),type="resp"),add=TRUE)
+```
