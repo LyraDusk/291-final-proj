@@ -1,0 +1,34 @@
+---
+title: "Graphs"
+author: "Lauren Meyer"
+date: "4/28/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+```
+
+Loading Data:
+```{r}
+ipumsdata <- read_csv("usa_00004.csv")
+small_data <- ipumsdata %>%
+  select(YEAR,SERIAL,STATEFIP,METRO,OWNERSHP,HHINCOME,PHONE,CINETHH,SEX,AGE,RACE,EDUC,EMPSTAT,OCC,INCTOT,FTOTINC,DIFFEYE,TRANTIME)
+newdata<-small_data %>%
+mutate(internet=if_else(CINETHH==3,0,
+                if_else(CINETHH %in% 1:2,1,NA_real_)))
+samp<-sample_n(newdata,100000) %>%
+  drop_na()
+```
+
+```{r}
+ggplot(samp, aes(y = HHINCOME, x = as.factor(internet), fill = as.factor(internet)))+ geom_boxplot() + scale_fill_manual(values = c("red", "green")) + scale_y_continuous(limits = c(0,750000), name = "Household Income ($)") + theme(legend.position = "none") + scale_x_discrete(name = "Internet Access", labels = c("No","Yes")) + ggtitle("Internet Access by Household Income")
+```
+
+```{r}
+ggplot(samp, aes(y = AGE, x = as.factor(internet), fill = as.factor(internet))) + geom_boxplot() + scale_fill_manual(values = c("red","green")) + scale_x_discrete(name = "Internet Access", labels = c("No","Yes")) + scale_y_continuous(name = "Age") + theme(legend.position = "none") + ggtitle("Internet Access by Age")
+
+```
+
